@@ -49,8 +49,7 @@
 
 
 
-
-<img src ="images/stack.gif">
+<img src ="images/result.gif">
 
 
 
