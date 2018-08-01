@@ -391,12 +391,12 @@ def align_sections(nsrc, dst0, parameters, other_channel_folders = False, clean=
                     sys.stdout.write('{}, '.format(os.path.basename(ch))); sys.stdout.flush()
                     chdst_tmp = os.path.join(chdst, 'tmp'); makedir(chdst_tmp)
                     chfls = listdirfull(ch); chfls.sort()
-                    if i == 0:shutil.copy(chfls[i])
-                    transformix_command_line_call(nrc = chfls[i+1], out = chdst_tmp, tp=tp)
+                    if i == 0:shutil.copy(chfls[i], chdst)
+                    transformix_command_line_call(src = chfls[i+1], out = chdst_tmp, tp=tp)
                     shutil.copy(os.path.join(chdst_tmp, 'result.tif'), os.path.join(chdst, '{}_aligned_{}.tif'.format(os.path.basename(fls[i+1])[:-4], str(i+1).zfill(4))))
                     removedir(chdst_tmp)
                 except:
-                    sys.stdout.write(' **Missing: {}** '.format(ch)); sys.stdout.flush()
+                    sys.stdout.write(' **Missing: {}** '.format(os.path.basename(ch))); sys.stdout.flush()
 
         #clean
         if clean: removedir(tmp)
