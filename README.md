@@ -29,16 +29,16 @@
   5. Open up a terminal window (linux: "CTL + ALT + T")
   6. Change directories into local folder containing this repository
   7. *python serial_section_processing.py*:
-        * After preprocessing steps, a window will appear with your sections, I suggest expanding the window size. 
+        	a) After preprocessing steps, a window will appear with your sections, I suggest expanding the window size. 
                 <img src ="images/first.png">
 
-		Click around those sections in order of plating
+		b) Click around those sections in order of plating
 		<img src ="images/second.png">
 
-		Close the shape by clicking close to the starting point, which will turn blue
+		c) Close the shape by clicking close to the starting point, which will turn blue
 		<img src ="images/third.png">
 
-		Repeat for all sections in the * **order of plating** *
+		d) Repeat for all sections in the * **order of plating** *.
 		<img src ="images/fourth.png">
         * Ideally there should be a consistent border around each section and the section should be in the middle of box.
         * Repeat for each section and close the window.
