@@ -30,6 +30,12 @@
   6. Change directories into local folder containing this repository
   7. *python serial_section_processing.py*:
         * After preprocessing steps, a window will appear with your sections, I suggest expanding the window size. Click around those sections in order of plating.
+<img src ="images/first.png">
+#start here
+<img src ="images/second.png">
+#start here
+<img src ="images/third.png"> <img src ="images/fourth.png">
+#start here
         * Ideally there should be a consistent border around each section and the section should be in the middle of box.
         * Repeat for each section and close the window.
         * The next window will open, and rinse and repeat for all sections.
