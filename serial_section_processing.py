@@ -81,10 +81,13 @@ class LineBuilder:
 
     def __call__(self, event):
         if event.inaxes!=self.line.axes: return
+        #y_x_transform = self.ax.transData.inverted().transform((event.ydata, event.xdata))
+        #print y_x_transform, event.ydata, event.xdata
+        y_x_transform = (event.ydata, event.xdata)
         if self.counter == 0:
             self.xs.append(event.xdata)
             self.ys.append(event.ydata)
-            self.objects[self.active_object] = [[event.ydata, event.xdata]] #keeping np convention
+            self.objects[self.active_object] = [[y_x_transform[0], y_x_transform[1]]] #keeping np convention
         if np.abs(event.xdata-self.xs[0])<=self.precision and np.abs(event.ydata-self.ys[0])<=self.precision and self.counter != 0:
             self.xs.append(self.xs[0])
             self.ys.append(self.ys[0])
@@ -96,7 +99,7 @@ class LineBuilder:
             self.shape_counter = self.shape_counter + 1
             self.xs = []
             self.ys = []
-            self.objects[self.active_object].append([event.ydata, event.xdata]) #keeping np convention
+            self.objects[self.active_object].append([y_x_transform[0], y_x_transform[1]]) #keeping np convention
             self.active_object+=1
             self.counter = 0
         else:
@@ -107,7 +110,7 @@ class LineBuilder:
             self.ax.plot(self.xs,self.ys,color=self.color)
             self.line.figure.canvas.draw()
             self.counter = self.counter + 1
-            self.objects[self.active_object].append([event.ydata, event.xdata]) #keeping np convention
+            self.objects[self.active_object].append([y_x_transform[0], y_x_transform[1]]) #keeping np convention
 
 def create_shape_on_image(data,cmap='jet'):
     def change_shapes(shapes):
@@ -161,12 +164,13 @@ def find_pixels_from_contours(pnts_dst, dst0, df, channel, verbose=True):
     '''
     sys.stdout.write('Collecting sections, this can take some time...'); sys.stdout.flush()
     dct ={os.path.basename(fl).split('_user_defined')[0].split(channel)[0][:-1]:load_dictionary(fl) for fl in listdirfull(pnts_dst, keyword='.p')}
+    p = mp.Pool(mp.cpu_count())
     for basename, ndct in dct.iteritems():
-        tdf = df[df.basename == basename]
-        iterlst = [(basename, dst0, row, level, ndct, verbose) for i,row in tdf.iterrows()]
-        p = mp.Pool(mp.cpu_count())
-        p.map(find_pixels_from_contours_helper, iterlst)
-        p.terminate()
+        if not bool(ndct):
+            tdf = df[df.basename == basename]
+            iterlst = [(basename, dst0, row, level, ndct, verbose) for i,row in tdf.iterrows()]
+            p.map(find_pixels_from_contours_helper, iterlst)
+    p.terminate()
 
     return
 
@@ -252,9 +256,14 @@ def convert_data_ndpi_to_tif_helper((row, level, dst, verbose)):
     '''
     '''
     fl = os.path.join(row['folder'],row['file'])
-    vol = ndpi_to_numpy(fl, level=level)
-    tifffile.imsave(os.path.join(dst, os.path.basename(fl)[:-4]+'_order_' + str(row['file_order']).zfill(4)+'.tif'), vol, compress=1)
-    if verbose: print('Completed {}'.format(fl))
+    #out = os.path.join(dst, 'slide_' + str(row['file_order']).zfill(4)+os.path.basename(fl)[:-4]+'.tif')
+    out = os.path.join(dst, os.path.basename(fl)[:-4]+'_order_' + str(row['file_order']).zfill(4)+'.tif')
+    if not os.path.exists(out):
+        vol = ndpi_to_numpy(fl, level=level)
+        tifffile.imsave(out, vol, compress=1)
+        if verbose: print('Completed {}'.format(fl))
+    else:
+        if verbose: print('{} already exists, skipping'.format(fl))
     return
 
 def register(df, fld):
