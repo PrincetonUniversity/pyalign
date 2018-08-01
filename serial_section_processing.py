@@ -75,7 +75,7 @@ class LineBuilder:
         plt.ioff()
         self.shape_counter = 0
         self.shape = {}
-        self.precision = 10
+        self.precision = 75
         self.objects = {}
         self.active_object=0
 
