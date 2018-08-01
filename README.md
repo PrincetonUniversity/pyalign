@@ -1,4 +1,4 @@
-### Script by tpisano@princeton.edu for alignment of nanozoomer tissue sections.
+### Script by tpisano@princeton.edu for alignment of *Nanozoomer* tissue sections.
 
 ## Installation Instructions:
   * Requirements:
@@ -16,19 +16,19 @@
   * pip install [openslide-python](https://openslide.org/api/python/)
 
 ## To use:
-  1. Open the "serial_section_processing.py"
-  2. Go to the bottom of the file where it says "Modify below"
+  1. Open the *serial_section_processing.py*
+  2. Go to the bottom of the file where it says *"Modify below"*
   3. Adjust the following inputs:
-        * src: list of main .npdi files in the correct order (note accompanying .ndpi files must be in same folder)
-        * dst: output location of this script
-        * parameters: list of elastix parameter .txt files to use. The "align_slices_elastix_parameters.txt" in this package typically works well.
-        * section_depth: spacing between slides
-        * level: integer value representing resolution to use. 1 is full resolution, usually 7 is fairly small. This will depend on acquisition parameters. Sometimes full resolution has too many pixels for most programs like openslide-python and ImageJ/Fiji
-        * channel to use for alignment e.g. 'Trtc', 'Brighfield'
+        * **src**: list of main .npdi files in the correct order (note accompanying .ndpi files must be in same folder)
+        * **dst**: output location of this script
+        * **parameters**: list of elastix parameter .txt files to use. The *align_slices_elastix_parameters.txt* in this package typically works well.
+        * **section_depth**: spacing between slides
+        * **level**: integer value representing resolution to use. 1 is full resolution, usually 7 is fairly small. This will depend on acquisition parameters. Sometimes full resolution has too many pixels for most programs like *openslide-python* and *ImageJ/Fiji*
+        * **channel** to use for alignment e.g. 'Trtc', 'Brighfield'
   4. Save and close this script.
   5. Open up a terminal window (linux: "CTL + ALT + T")
   6. Change directories into local folder containing this repository
-  7. "python serial_section_processing.py"
+  7. *python serial_section_processing.py*
   8. :coffee: + :pray:
 
 
