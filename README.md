@@ -28,7 +28,7 @@
   4. Save and close this script.
   5. Open up a terminal window (linux: "CTL + ALT + T")
   6. Change directories into local folder containing this repository
-  7. *python serial_section_processing.py*
+  7. *python serial_section_processing.py*:
         *After preprocessing steps, a window will appear with your sections, I suggest expanding the window size. Click around those sections in order of plating. 
         *Ideally there should be a consistent border around each section and the section should be in the middle of box.
         *Repeat for each section and close the window.
