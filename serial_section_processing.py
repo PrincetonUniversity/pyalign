@@ -167,11 +167,12 @@ def find_pixels_from_contours(pnts_dst, dst0, df, channel, verbose=True):
     p = mp.Pool(mp.cpu_count())
     for basename, ndct in dct.iteritems():
         if bool(ndct):
-            tdf = df[df.basename == basename]
+            tdf = df[df.basename == basename[11:]]
             iterlst = [(basename, dst0, row, level, ndct, verbose) for i,row in tdf.iterrows()]
             p.map(find_pixels_from_contours_helper, iterlst)
     p.terminate()
-
+    if verbose:
+            sys.stdout.write('...completed collecting sections\n\n'); sys.stdout.flush()
     return
 
 def find_pixels_from_contours_helper((basename, dst0, row, level, ndct, verbose)):
@@ -198,6 +199,30 @@ def find_pixels_from_contours_helper((basename, dst0, row, level, ndct, verbose)
         if verbose:
             sys.stdout.write('\n   completed {}: {}'.format(row['channel'], os.path.basename(fl))); sys.stdout.flush()
     return
+
+def pad_first_image(nsrc, other_channel_folders):
+    '''function to find biggest image and pad first to accomodate
+    '''
+    dims = np.asarray([get_dims(fl) for fl in listdirfull(nsrc)])
+    ymax, xmax = (dims[:,0].max(), dims[:,1].max())
+    first_fl = tifffile.imread(listdirfull(nsrc)[0])
+    yd, xd = first_fl.shape
+    pad_dims = (int((ymax-yd)/2.0),int((ymax-yd)/2.0)), (int((xmax-xd)/2.0),int((xmax-xd)/2.0))
+    first_fl_pad = np.pad(first_fl, pad_dims, mode='constant')
+    tifffile.imsave(listdirfull(nsrc)[0], first_fl_pad)
+    
+    if len(other_channel_folders)>0:
+        for ch in other_channel_folders:
+            chfl = listdirfull(ch)[0]
+            tifffile.imsave(chfl, np.pad(tifffile.imread(chfl), pad_dims, mode='constant'))
+    
+    return
+    
+def get_dims(fl):
+    with tifffile.TiffFile(fl) as tf:
+        dims = tf.asarray().shape
+        tf.close()
+    return np.asarray(dims)
 
 def read_ndpis(src):
     '''Extract out files
@@ -256,8 +281,8 @@ def convert_data_ndpi_to_tif_helper((row, level, dst, verbose)):
     '''
     '''
     fl = os.path.join(row['folder'],row['file'])
-    #out = os.path.join(dst, 'slide_' + str(row['file_order']).zfill(4)+os.path.basename(fl)[:-4]+'.tif')
-    out = os.path.join(dst, os.path.basename(fl)[:-4]+'_order_' + str(row['file_order']).zfill(4)+'.tif')
+    out = os.path.join(dst, 'slide_' + str(row['file_order']).zfill(4)+'_'+os.path.basename(fl)[:-4]+'.tif')
+    #out = os.path.join(dst, os.path.basename(fl)[:-4]+'_order_' + str(row['file_order']).zfill(4)+'.tif')
     if not os.path.exists(out):
         vol = ndpi_to_numpy(fl, level=level)
         tifffile.imsave(out, vol, compress=1)
@@ -265,12 +290,6 @@ def convert_data_ndpi_to_tif_helper((row, level, dst, verbose)):
     else:
         if verbose: print('{} already exists, skipping'.format(fl))
     return
-
-def register(df, fld):
-    '''
-    '''
-    fls = listdirfull(fld); fls.sort()
-    otsu_filter(vol)
 
 def elastix_command_line_call(fx, mv, out, parameters, verbose=True):
     '''Wrapper Function to call elastix using the commandline, this can be time consuming
@@ -325,21 +344,21 @@ def transformix_command_line_call(src, out, tp):
     sp.call(['transformix', '-in', src, '-out', out, '-tp', tp])
     return
 
-def align_sections(src, dst, parameters, other_channel_folders = False, clean=True):
+def align_sections(nsrc, dst0, parameters, other_channel_folders = False, clean=True):
     '''
-    src = list of pre-'cut' files
+    nsrc = list of pre-'cut' files
     dst = location to save
     parameters = list of files in order to register
     clean = T/F if true remove elastix folders
     other_channel_folders = list of folders to apply the same transform to
 
-    src = '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output/data/Trtc'
-    dst = '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output/data/Trtc_aligned'
+    nsrc = '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output/data/Trtc'
+    dst0 = '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output/data/Trtc_aligned'
     parameters = ['/home/wanglab/LightSheetData/witten-mouse/nanozoomer/align_slices_elastix_parameters.txt']
     clean = True
     other_channel_folders=['/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output/data/YFP', '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output/data/Brighfield', '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output/data/Dapi']
     '''
-    fls = listdirfull(src); fls.sort(); makedir(dst)
+    fls = listdirfull(nsrc); fls.sort(); makedir(dst0)
 
     #iterate
     for i, fl in enumerate(fls[:-1]):
@@ -349,13 +368,14 @@ def align_sections(src, dst, parameters, other_channel_folders = False, clean=Tr
             break
         #set up tmp folder
         sys.stdout.write('Aligning section {} with {}...'.format(i+1, i)); sys.stdout.flush()
-        tmp = os.path.join(dst, 'elastix_{}'.format(str(i).zfill(4))); makedir(tmp)
+        tmp = os.path.join(dst0, 'elastix_{}'.format(str(i).zfill(4))); makedir(tmp)
+        src_aligned = nsrc+'_aligned'; makedir(src_aligned)
 
         #get images
-        fx_aligned = os.path.join(dst, '{}_aligned_{}.tif'.format(os.path.basename(fls[i])[:-4], str(i).zfill(4)))
-        mv_aligned = os.path.join(dst, '{}_aligned_{}.tif'.format(os.path.basename(fls[i+1])[:-4], str(i+1).zfill(4)))
+        fx_aligned = os.path.join(src_aligned, '{}_aligned_{}.tif'.format(os.path.basename(fls[i])[:-4], str(i).zfill(4)))
+        mv_aligned = os.path.join(src_aligned, '{}_aligned_{}.tif'.format(os.path.basename(fls[i+1])[:-4], str(i+1).zfill(4)))
         if i == 0: shutil.copy(fl, fx_aligned)
-
+            
         #register
         outfile, tp = elastix_command_line_call(fx=fx_aligned, mv=fls[i+1], out=tmp, parameters=parameters, verbose=False)
 
@@ -371,8 +391,9 @@ def align_sections(src, dst, parameters, other_channel_folders = False, clean=Tr
                     sys.stdout.write('{}, '.format(os.path.basename(ch))); sys.stdout.flush()
                     chdst_tmp = os.path.join(chdst, 'tmp'); makedir(chdst_tmp)
                     chfls = listdirfull(ch); chfls.sort()
-                    transformix_command_line_call(src = chfls[i], out = chdst_tmp, tp=tp)
-                    shutil.copy(os.path.join(chdst_tmp, 'result.tif'), os.path.join(chdst, '{}_aligned_{}.tif'.format(os.path.basename(fls[i])[:-4], str(i).zfill(4))))
+                    if i == 0:shutil.copy(chfls[i])
+                    transformix_command_line_call(nrc = chfls[i+1], out = chdst_tmp, tp=tp)
+                    shutil.copy(os.path.join(chdst_tmp, 'result.tif'), os.path.join(chdst, '{}_aligned_{}.tif'.format(os.path.basename(fls[i+1])[:-4], str(i+1).zfill(4))))
                     removedir(chdst_tmp)
                 except:
                     sys.stdout.write(' **Missing: {}** '.format(ch)); sys.stdout.flush()
@@ -410,9 +431,14 @@ def preprocess(src, dst, parameters, level = 6, channel='Trtc', verbose=True):
 
     #now load and collect sections and save them out
     find_pixels_from_contours(pnts_dst, dst0, df, channel)
-
+    
+    #need to expand images to the largest section
+    nsrc = os.path.join(dst0, channel)
+    other_channel_folders = [xx for xx in listdirfull(dst0) if dst1 not in xx and '_registration' not in xx and '_aligned' not in xx and nsrc not in xx]
+    pad_first_image(nsrc, other_channel_folders)
+    
     #now register
-    align_sections(os.path.join(dst0, channel), dst0, parameters=parameters, other_channel_folders = [xx for xx in listdirfull(dst0) if dst1 not in xx and '_registration' not in xx and '_aligned' not in xx], clean=True)
+    align_sections(nsrc, dst0, parameters, other_channel_folders, clean=True)
 
     return
 
@@ -424,16 +450,17 @@ if __name__ == '__main__':
     #list of files in correct order
     src = ['/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-1.ndpis',
            '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-2.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-3 - 2018-07-18 18.04.40.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-4 - 2018-07-18 04.14.19.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-5 - 2018-07-18 02.10.10.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-6 - 2018-07-17 23.50.06.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-7 - 2018-07-17 21.25.57.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-8 - 2018-07-17 19.05.58.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-9_2 - 2018-07-17 17.18.45.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-10.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-11.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-12 - 2018-07-18 19.53.50.ndpis']
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-3 - 2018-07-18 18.04.40.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-4 - 2018-07-18 04.14.19.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-5 - 2018-07-18 02.10.10.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-6 - 2018-07-17 23.50.06.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-7 - 2018-07-17 21.25.57.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-8 - 2018-07-17 19.05.58.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-9_2 - 2018-07-17 17.18.45.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-10.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-11.ndpis',
+           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-12 - 2018-07-18 19.53.50.ndpis'
+		]
 
     #location to save data
     dst = '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output'
