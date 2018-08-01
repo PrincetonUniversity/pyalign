@@ -3,7 +3,7 @@
 ## Installation Instructions:
   * Requirements:
     * Python (2.7, not 3+).
-	* Openslide-tools package - see below for linux installation
+	* *openslide-tools* package - see below for linux installation
 	* This package was made for linux/osx, and has not been tested on windows. If running windows I would suggest using a virtual machine.
 		1. [Download Virtual Box](https://www.virtualbox.org/wiki/Downloads)
 		2. [Download Linux Ubuntu](https://www.ubuntu.com/download)
