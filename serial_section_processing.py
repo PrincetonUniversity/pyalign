@@ -83,7 +83,7 @@ class LineBuilder:
         if event.inaxes!=self.line.axes: return
         #y_x_transform = self.ax.transData.inverted().transform((event.ydata, event.xdata))
         #print y_x_transform, event.ydata, event.xdata
-        y_x_transform = (event.ydata, event.xdata)
+        y_x_transform = (event.xdata, event.ydata) #INTENTIONALLY FLIPPING X AND Y HERE
         if self.counter == 0:
             self.xs.append(event.xdata)
             self.ys.append(event.ydata)
@@ -166,7 +166,7 @@ def find_pixels_from_contours(pnts_dst, dst0, df, channel, verbose=True):
     dct ={os.path.basename(fl).split('_user_defined')[0].split(channel)[0][:-1]:load_dictionary(fl) for fl in listdirfull(pnts_dst, keyword='.p')}
     p = mp.Pool(mp.cpu_count())
     for basename, ndct in dct.iteritems():
-        if not bool(ndct):
+        if bool(ndct):
             tdf = df[df.basename == basename]
             iterlst = [(basename, dst0, row, level, ndct, verbose) for i,row in tdf.iterrows()]
             p.map(find_pixels_from_contours_helper, iterlst)
