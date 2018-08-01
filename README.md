@@ -30,7 +30,7 @@
   6. Change directories into local folder containing this repository
   7. *python serial_section_processing.py*:
         * After preprocessing steps, a window will appear with your sections, I suggest expanding the window size. Click around those sections in order of plating.
-<img src ="images/first.png">
+                <img src ="images/first.png">
 #start here
 <img src ="images/second.png">
 #start here
