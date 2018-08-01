@@ -167,6 +167,8 @@ def find_pixels_from_contours(pnts_dst, dst0, df, channel, verbose=True):
     p = mp.Pool(mp.cpu_count())
     for basename, ndct in dct.iteritems():
         if bool(ndct):
+            #remove entrees with 2 or less points
+            ndct = {k:v for k,v in ndct.iteritems() if len(v)>=3}
             tdf = df[df.basename == basename[11:]]
             iterlst = [(basename, dst0, row, level, ndct, verbose) for i,row in tdf.iterrows()]
             p.map(find_pixels_from_contours_helper, iterlst)
@@ -187,17 +189,20 @@ def find_pixels_from_contours_helper((basename, dst0, row, level, ndct, verbose)
 
     #segment out sections
     for idx, cnt in ndct.iteritems():
-        zero = np.zeros_like(vol)
-        cp = np.copy(vol)
-        cnt = np.asarray([[int(xx[0]),int(xx[1])] for xx in cnt])
-        cv2.fillPoly(zero, pts=[cnt], color=(255,255,255))
-        cp[zero==0]=0
-        y,x=np.where(cp>0)
-        cp=cp[np.min(y):np.max(y), np.min(x):np.max(x)]
-        fl = os.path.join(dst_ch, '{}_section_{}.tif'.format(basename, str(idx).zfill(4)))
-        tifffile.imsave(fl, cp, compress=1)
-        if verbose:
-            sys.stdout.write('\n   completed {}: {}'.format(row['channel'], os.path.basename(fl))); sys.stdout.flush()
+        try:
+            zero = np.zeros_like(vol)
+            cp = np.copy(vol)
+            cnt = np.asarray([[int(xx[0]),int(xx[1])] for xx in cnt])
+            cv2.fillPoly(zero, pts=[cnt], color=(255,255,255))
+            cp[zero==0]=0
+            y,x=np.where(cp>0)
+            cp=cp[np.min(y):np.max(y), np.min(x):np.max(x)]
+            fl = os.path.join(dst_ch, '{}_section_{}.tif'.format(basename, str(idx).zfill(4)))
+            tifffile.imsave(fl, cp, compress=1)
+            if verbose:
+                sys.stdout.write('\n   completed {}: {}'.format(row['channel'], os.path.basename(fl))); sys.stdout.flush()
+        except Exception, e:
+            print('\n\nError on {} {}, {}\n\n'.format(basename, os.path.join(dst_ch, '{}_section_{}.tif'.format(basename, str(idx).zfill(4))), e))
     return
 
 def pad_first_image(nsrc, other_channel_folders):
