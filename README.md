@@ -5,9 +5,9 @@
 	* Python (2.7, not 3+).
 	* Openslide-tools package - see below for linux installation
 	* This package was made for linux/osx, and has not been tested on windows. If running windows I would suggest using a virtual machine.
->		(1) [Download Virtual Box](https://www.virtualbox.org/wiki/Downloads)
->		(2) [Download Linux Ubuntu](https://www.ubuntu.com/download)
->		(3) [Install the VM machine](http://www.instructables.com/id/How-to-install-Linux-on-your-Windows/)
+		1) [Download Virtual Box](https://www.virtualbox.org/wiki/Downloads)
+		2) [Download Linux Ubuntu](https://www.ubuntu.com/download)
+		3) [Install the VM machine](http://www.instructables.com/id/How-to-install-Linux-on-your-Windows/)
 
 ## Install necessary dependencies using anaconda (Install [anaconda](https://www.anaconda.com/download/) if not already):
 	* conda install numpy pandas skimage shutil
