@@ -43,8 +43,11 @@
 		<img src ="images/fourth.png">
         * Ideally there should be a consistent border around each section and the section should be in the middle of box.
         * Repeat for each section and close the window.
-        * The next window will open, and rinse and repeat for all sections.
+        * The next window will open, rinse and repeat for all sections.
   8. :coffee:+ :pray:
+
+
+
 
 
 
