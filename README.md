@@ -10,8 +10,9 @@
 		3. [Install the VM machine](http://www.instructables.com/id/How-to-install-Linux-on-your-Windows/)
 
 ## Install necessary dependencies using anaconda (Install [anaconda](https://www.anaconda.com/download/) if not already):
-  * conda install numpy pandas skimage shutil
+  * conda install numpy pandas sckit-image
   * conda install -c menpo opencv (requires opencv 3+; if this fails then try: conda install -c conda-forge opencv)
+  * sudo apt-get install elastix
   * sudo apt-get install openslide-tools
   * pip install [openslide-python](https://openslide.org/api/python/)
 
