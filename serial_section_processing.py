@@ -171,7 +171,7 @@ def find_pixels_from_contours(pnts_dst, dst0, df, channel, verbose=True):
             ndct = {k:v for k,v in ndct.iteritems() if len(v)>=3}
             tdf = df[df.basename == basename[11:]]
             iterlst = [(basename, dst0, row, level, ndct, verbose) for i,row in tdf.iterrows()]
-            p.map(find_pixels_from_contours_helper, iterlst)
+            p.map(find_pixels_from_contours_helper, iterlst)          
     p.terminate()
     if verbose:
             sys.stdout.write('...completed collecting sections\n\n'); sys.stdout.flush()
@@ -185,24 +185,26 @@ def find_pixels_from_contours_helper((basename, dst0, row, level, ndct, verbose)
     dst_ch = os.path.join(dst0, row['channel']); makedir(dst_ch)
 
     #load
-    vol = ndpi_to_numpy(os.path.join(row['folder'],row['file']), level=level)
-
-    #segment out sections
-    for idx, cnt in ndct.iteritems():
-        try:
-            zero = np.zeros_like(vol)
-            cp = np.copy(vol)
-            cnt = np.asarray([[int(xx[0]),int(xx[1])] for xx in cnt])
-            cv2.fillPoly(zero, pts=[cnt], color=(255,255,255))
-            cp[zero==0]=0
-            y,x=np.where(cp>0)
-            cp=cp[np.min(y):np.max(y), np.min(x):np.max(x)]
-            fl = os.path.join(dst_ch, '{}_section_{}.tif'.format(basename, str(idx).zfill(4)))
-            tifffile.imsave(fl, cp, compress=1)
-            if verbose:
-                sys.stdout.write('\n   completed {}: {}'.format(row['channel'], os.path.basename(fl))); sys.stdout.flush()
-        except Exception, e:
-            print('\n\nError on {} {}, {}\n\n'.format(basename, os.path.join(dst_ch, '{}_section_{}.tif'.format(basename, str(idx).zfill(4))), e))
+    fl = os.path.join(row['folder'],row['file'])
+    if os.path.exists(fl):
+        vol = ndpi_to_numpy(fl, level=level)
+    
+        #segment out sections
+        for idx, cnt in ndct.iteritems():
+            try:
+                zero = np.zeros_like(vol)
+                cp = np.copy(vol)
+                cnt = np.asarray([[int(xx[0]),int(xx[1])] for xx in cnt])
+                cv2.fillPoly(zero, pts=[cnt], color=(255,255,255))
+                cp[zero==0]=0
+                y,x=np.where(cp>0)
+                cp=cp[np.min(y):np.max(y), np.min(x):np.max(x)]
+                fl = os.path.join(dst_ch, '{}_section_{}.tif'.format(basename, str(idx).zfill(4)))
+                tifffile.imsave(fl, cp, compress=1)
+                if verbose:
+                    sys.stdout.write('\n   completed {}: {}'.format(row['channel'], os.path.basename(fl))); sys.stdout.flush()
+            except Exception, e:
+                print('\n\nError on {} {}, {}\n\n'.format(basename, os.path.join(dst_ch, '{}_section_{}.tif'.format(basename, str(idx).zfill(4))), e))
     return
 
 def pad_first_image(nsrc, other_channel_folders):
@@ -218,9 +220,10 @@ def pad_first_image(nsrc, other_channel_folders):
     
     if len(other_channel_folders)>0:
         for ch in other_channel_folders:
-            chfl = listdirfull(ch)[0]
-            tifffile.imsave(chfl, np.pad(tifffile.imread(chfl), pad_dims, mode='constant'))
-    
+            chfls = listdirfull(ch)
+            if len(chfls)>0:
+                chfl = listdirfull(ch)[0]
+                tifffile.imsave(chfl, np.pad(tifffile.imread(chfl), pad_dims, mode='constant'))
     return
     
 def get_dims(fl):
@@ -393,19 +396,19 @@ def align_sections(nsrc, dst0, parameters, other_channel_folders = False, clean=
             for ch in other_channel_folders:
                 try: #this is done because sometimes people don't take all channels for all ims
                     chdst = ch+'_aligned'; makedir(chdst)
-                    sys.stdout.write('{}, '.format(os.path.basename(ch))); sys.stdout.flush()
                     chdst_tmp = os.path.join(chdst, 'tmp'); makedir(chdst_tmp)
                     chfls = listdirfull(ch); chfls.sort()
                     if i == 0:shutil.copy(chfls[i], chdst)
                     transformix_command_line_call(src = chfls[i+1], out = chdst_tmp, tp=tp)
                     shutil.copy(os.path.join(chdst_tmp, 'result.tif'), os.path.join(chdst, '{}_aligned_{}.tif'.format(os.path.basename(fls[i+1])[:-4], str(i+1).zfill(4))))
                     removedir(chdst_tmp)
+                    sys.stdout.write('{}, '.format(os.path.basename(ch))); sys.stdout.flush()
                 except:
                     sys.stdout.write(' **Missing: {}** '.format(os.path.basename(ch))); sys.stdout.flush()
 
         #clean
         if clean: removedir(tmp)
-        sys.stdout.write('...done in {} seconds.\n'.format(int(time.time()-st))); sys.stdout.flush()
+        sys.stdout.write('completed in {} seconds.\n'.format(int(time.time()-st))); sys.stdout.flush()
 
 def preprocess(src, dst, parameters, level = 6, channel='Trtc', verbose=True):
     '''Function to collect and organize files
@@ -453,25 +456,26 @@ if __name__ == '__main__':
     #Adjust these inputs:
 
     #list of files in correct order
-    src = ['/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-1.ndpis',
-           '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-2.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-3 - 2018-07-18 18.04.40.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-4 - 2018-07-18 04.14.19.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-5 - 2018-07-18 02.10.10.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-6 - 2018-07-17 23.50.06.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-7 - 2018-07-17 21.25.57.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-8 - 2018-07-17 19.05.58.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-9_2 - 2018-07-17 17.18.45.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-10.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-11.ndpis',
-           #'/home/wanglab/LightSheetData/witten-mouse/nanozoomer/Rabies/M9332_Rabies_2-12 - 2018-07-18 19.53.50.ndpis'
-		]
+    src = ['/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-1.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-2.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-3 - 2018-07-18 18.04.40.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-4 - 2018-07-18 04.14.19.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-5 - 2018-07-18 02.10.10.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-6 - 2018-07-17 23.50.06.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-7 - 2018-07-17 21.25.57.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-8 - 2018-07-17 19.05.58.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-9_2 - 2018-07-17 17.18.45.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-10.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-11.ndpis',
+	'/media/tpisano/FAT32/nanozoomer/M9332_Rabies_2-12 - 2018-07-18 19.53.50.ndpis']
+
 
     #location to save data
-    dst = '/home/wanglab/LightSheetData/witten-mouse/nanozoomer/output'
+    dst = 	'/media/tpisano/FAT32/nanozoomer/output'
 
-    #elastix parameter file to use for alignment
-    parameters = ['/home/wanglab/LightSheetData/witten-mouse/nanozoomer/align_slices_elastix_parameters.txt']
+    #elastix parameter file to use for alignment - fast is typically sufficient, but for better results use 'align_slices_elastix_parameters.txt'
+    parameters = ['/media/tpisano/FAT32/pyalign/align_slices_elastix_parameters_fast.txt']
+    #parameters = ['/media/tpisano/FAT32/pyalign/align_slices_elastix_parameters.txt']
 
     #sectioning depth
     section_depth = 40 #um

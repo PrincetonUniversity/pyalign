@@ -45,14 +45,14 @@
         * Ideally there should be a consistent border around each section and the section should be in the middle of box.
         * Repeat for each section and close the window.
         * The next window will open, rinse and repeat for all sections.
-  8. :coffee:+ :pray:
+  8. Grab a :coffee:
+
+
+
+Before                      After alignment
+<img src='images/before.gif> <img src ="images/result.gif">
 
 
 
 
-<img src ="images/result.gif">
-
-
-
-
-:v:
+:pray:   :v:
