@@ -50,6 +50,7 @@
 
 
 Before and after alignment
+
 <img src="images/before.gif"><img src ="images/result.gif">
 
 
