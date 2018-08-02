@@ -49,11 +49,8 @@
 
 
 
-Before
-<img src="images/before.gif">
-
-After Alignment
-<img src ="images/result.gif">
+Before and after alignment
+<img src="images/before.gif"><img src ="images/result.gif">
 
 
 
