@@ -7,6 +7,7 @@ Created on Mon Jul 30 13:15:33 2018
 """
 import os, numpy as np, sys, subprocess as sp
 from skimage.external import tifffile
+from skimage.transform import resize
 from tools.registration.register import elastix_command_line_call
 #really important to have order 1 interpolation of rigid
 def listdirfull(src, keyword=False):
@@ -80,8 +81,11 @@ if __name__ == '__main__':
     
     #location of aligned files from serial_section_processing.py
     src = '/media/tpisano/FAT32/fast/Trtc_aligned'
-    src = '/media/tpisano/FAT32/nanozoomer/output_level2/data/Trtc_aligned'
     src = '/media/tpisano/FAT32/nanozoomer/output/data/Trtc_aligned'
+    src = '/media/tpisano/FAT32/nanozoomer/output_level2/data/Trtc_aligned'
+    
+    #optionally resize - percentage of atlas to resize to
+    resize_percentage = 1.3
     
     #location to save elastix input into
     out = '/media/tpisano/FAT32/volumetric/elastix'
@@ -91,6 +95,7 @@ if __name__ == '__main__':
     #load src, concatenate and make sure appropriate bitdepth
     vol = np.asarray([tifffile.imread(xx).astype('uint8') for xx in listdirfull(src)]) #need to do the uint8 thing
     nsrc = src+'.tif'
+    if resize_percentage: vol = resize(vol, [xx*resize_percentage for xx in tifffile.imread(atlas_path).shape])
     tifffile.imsave(nsrc, vol.astype('uint16')) #needs to be 16 bit!
 
     #now run elastix:

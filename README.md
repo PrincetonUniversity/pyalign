@@ -50,6 +50,27 @@
         <img src ="images/result.gif">
 
   9. To run volumetric alignment
+
+    parameters = ['/media/tpisano/FAT32/volumetric/Order1_Par0000affine.txt',
+                  #'/media/tpisano/FAT32/volumetric/Order2_Par0000bspline.txt'
+                  ]
+    #Path to Atlas, note that this must be oriented in the same way as your dataset, see FIJI/ImageJ for ways to reorient
+    atlas_path =  '/media/tpisano/FAT32/volumetric/average_template_25_coronal.tif'
+    
+    #location of aligned files from serial_section_processing.py
+    src = '/media/tpisano/FAT32/fast/Trtc_aligned'
+    src = '/media/tpisano/FAT32/nanozoomer/output/data/Trtc_aligned'
+    src = '/media/tpisano/FAT32/nanozoomer/output_level2/data/Trtc_aligned'
+    
+    #optionally resize - percentage of atlas to resize to
+    resize_percentage = 1.3
+    
+    #location to save elastix input into
+    out = '/media/tpisano/FAT32/volumetric/elastix'
+
+
+
+
         * After volumeteric aligment:
         <img src ="images/volumetric_result.gif">
 
