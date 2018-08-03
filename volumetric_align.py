@@ -84,10 +84,10 @@ if __name__ == '__main__':
     src = '/media/tpisano/FAT32/nanozoomer/output/data/Trtc_aligned'
     src = '/media/tpisano/FAT32/nanozoomer/output_level2/data/Trtc_aligned'
     
-    #optionally resize - percentage of atlas to resize to
-    resize_percentage = 1.3
+    #optionally resize - scale of atlas to resize to
+    resize_scale= 1.3
     
-    #location to save elastix input into
+    #location to save elastix output into
     out = '/media/tpisano/FAT32/volumetric/elastix'
     
     #######DO NOT NEED TO TOUCH BELOW
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     #load src, concatenate and make sure appropriate bitdepth
     vol = np.asarray([tifffile.imread(xx).astype('uint8') for xx in listdirfull(src)]) #need to do the uint8 thing
     nsrc = src+'.tif'
-    if resize_percentage: vol = resize(vol, [xx*resize_percentage for xx in tifffile.imread(atlas_path).shape])
+    if resize_scale: vol = resize(vol, [xx*resize_scale for xx in tifffile.imread(atlas_path).shape])
     tifffile.imsave(nsrc, vol.astype('uint16')) #needs to be 16 bit!
 
     #now run elastix:
@@ -111,7 +111,7 @@ if False:
     #location of aligned files from serial_section_processing.py
     src = '/media/tpisano/FAT32/volumetric/elastix_bsplineopt/affine.tif'
     
-    #location to save elastix input into
+    #location to save elastix output into
     out =  '/media/tpisano/FAT32/volumetric/elastix_bsplineopt'
     
     #now run elastix:

@@ -22,7 +22,7 @@
   3. Adjust the following inputs:
         * **src**: list of main .npdi files in the correct order (note accompanying .ndpi files must be in same folder)
         * **dst**: output location of this script
-        * **parameters**: list of elastix parameter .txt files to use. The *align_slices_elastix_parameters.txt* in this package typically works well.
+        * **parameters**: list of elastix parameter .txt files to use. The *align_slices_elastix_parameters_fullscale.txt* in this package typically works well.
         * **section_depth**: spacing between slides
         * **level**: integer value representing resolution to use. 1 is full resolution, usually 7 is fairly small. This will depend on acquisition parameters. Sometimes full resolution has too many pixels for most programs like *openslide-python* and *ImageJ/Fiji*
         * **channel** to use for alignment e.g. 'Trtc', 'Brighfield'
@@ -49,27 +49,14 @@
         * Before and after alignment:
         <img src ="images/result.gif">
 
-  9. To run volumetric alignment
-
-    parameters = ['/media/tpisano/FAT32/volumetric/Order1_Par0000affine.txt',
-                  #'/media/tpisano/FAT32/volumetric/Order2_Par0000bspline.txt'
-                  ]
-    #Path to Atlas, note that this must be oriented in the same way as your dataset, see FIJI/ImageJ for ways to reorient
-    atlas_path =  '/media/tpisano/FAT32/volumetric/average_template_25_coronal.tif'
-    
-    #location of aligned files from serial_section_processing.py
-    src = '/media/tpisano/FAT32/fast/Trtc_aligned'
-    src = '/media/tpisano/FAT32/nanozoomer/output/data/Trtc_aligned'
-    src = '/media/tpisano/FAT32/nanozoomer/output_level2/data/Trtc_aligned'
-    
-    #optionally resize - percentage of atlas to resize to
-    resize_percentage = 1.3
-    
-    #location to save elastix input into
-    out = '/media/tpisano/FAT32/volumetric/elastix'
-
-
-
+  9. To run volumetric alignment. Open * "volumetric_align.py" * and adjust the following inputs:
+	* **parameters**: list of elastix parameter .txt files to use. The *Order1_Par0000affine* and *Order2_Par0000bspline* in this package typically works well.
+	* **atlas_path**: file path to volumetric atlas of choice; note that this must be oriented in the same way as your dataset, see FIJI/ImageJ for ways to change orientation
+	* **src**: location of aligned folder from serial_section_processing.py to use as moving image
+	* **resize_scale**: optional - scale of atlas to resize to (typically 1.3 works well)
+	* **out**: location to save elastix output into
+  10. Change directories into local folder containing this repository and type "*python volumetric_align.py*"
+  11. Grab another :coffee:
 
         * After volumeteric aligment:
         <img src ="images/volumetric_result.gif">

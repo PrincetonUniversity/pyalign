@@ -3,7 +3,7 @@
 // Description: affine, MI, ASGD
 
 //things to adjust
-(NumberOfResolutions 6)
+(NumberOfResolutions 8)
 (Transform "EulerTransform") //(Transform "AffineTransform") "TranslationTransform", SimilarityTransform
 (MaximumNumberOfIterations 2500) 
 (NumberOfSpatialSamples 4000)
