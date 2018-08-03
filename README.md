@@ -50,7 +50,7 @@
         <img src ="images/result.gif">
 
   9. To run volumetric alignment:
-        *After volumeteric aligment
+        *After volumeteric aligment:
         <img src="image/volumetric_result.gif">
 
 
