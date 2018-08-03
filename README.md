@@ -49,9 +49,10 @@
         * Before and after alignment:
         <img src ="images/result.gif">
 
-  9. To run volumetric alignment:
-        *After volumeteric aligment:
+  9. To run volumetric alignment
+        * After volumeteric aligment:
         <img src="image/volumetric_result.gif">
+
 
 
 :pray:   :v:
