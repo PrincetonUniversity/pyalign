@@ -47,7 +47,7 @@
 (FixedImageBSplineInterpolationOrder 1)
 (UseRandomSampleRegion "true")
 (SampleRegionSize 50.0 50.0 50.0)
-(NumberOfSpatialSamples 10000 )
+(NumberOfSpatialSamples 7500 ) //was 10k, a bit too much for smaller samples
 (NewSamplesEveryIteration "true")
 (CheckNumberOfSamples "true")
 (MaximumNumberOfSamplingAttempts 10)
