@@ -46,14 +46,12 @@
         * Repeat for each section and close the window.
         * The next window will open, rinse and repeat for all sections.
   8. Grab a :coffee:
+        * Before and after alignment:
+        <img src ="images/result.gif">
 
-
-
-Before and after alignment:
-
-<img src ="images/result.gif">
-
-
+  9. To run volumetric alignment:
+        *After volumeteric aligment
+        <img src="image/volumetric_result.gif">
 
 
 :pray:   :v:

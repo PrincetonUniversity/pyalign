@@ -207,7 +207,7 @@ def find_pixels_from_contours_helper((basename, dst0, row, level, ndct, verbose)
                 print('\n\nError on {} {}, {}\n\n'.format(basename, os.path.join(dst_ch, '{}_section_{}.tif'.format(basename, str(idx).zfill(4))), e))
     return
 
-def pad_first_image(nsrc, other_channel_folders):
+def pad_first_image(nsrc, other_channel_folders=[]):
     '''function to find biggest image and pad first to accomodate
     '''
     dims = np.asarray([get_dims(fl) for fl in listdirfull(nsrc)])
@@ -474,8 +474,8 @@ if __name__ == '__main__':
     dst = 	'/media/tpisano/FAT32/nanozoomer/output'
 
     #elastix parameter file to use for alignment - fast is typically sufficient, but for better results use 'align_slices_elastix_parameters.txt'
-    parameters = ['/media/tpisano/FAT32/pyalign/align_slices_elastix_parameters_fast.txt']
-    #parameters = ['/media/tpisano/FAT32/pyalign/align_slices_elastix_parameters.txt']
+    parameters = ['/media/tpisano/FAT32/pyalign/elastix_files/align_slices_elastix_parameters_fast.txt']
+    #parameters = ['/media/tpisano/FAT32/pyalign/elastix_files/align_slices_elastix_parameters.txt']
 
     #sectioning depth
     section_depth = 40 #um
