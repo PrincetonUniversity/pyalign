@@ -51,7 +51,7 @@
 
   9. To run volumetric alignment
         * After volumeteric aligment:
-        <img src="image/volumetric_result.gif">
+        <img src ="images/volumetric_result.gif">
 
 
 
